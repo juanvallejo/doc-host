@@ -31,7 +31,8 @@ var app = http.createServer(function(req, res) {
 	if(req.url == '/') {
 		res.writeHead(200, { 'Content-Type': 'text/html' });
 		res.end('<form method="POST" action="/api/post" enctype="multipart/form-data"> \
-			<input type="file" name="image" /> \
+			<input type="file" name="image" /><br /> \
+			<input type="text" name="username" placeholder="Enter your username" /> \
 			<input type="submit" value="submit" /> \
 		</form>');
 	}

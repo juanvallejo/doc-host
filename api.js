@@ -1,9 +1,7 @@
-var fs = require('fs');
-var spawn = require('child_process').spawn;
+var fs         = require('fs');
+var spawn      = require('child_process').spawn;
 var Multiparty = require('multiparty');
-var sqlite = require('sqlite3');
-
-var procs = [];
+var db         = require('./db.js');
 
 var api = {
 
@@ -24,7 +22,6 @@ var api = {
 			"uploads": (data || [])
 		}));
 
-		
 	},
 
 	receive_res_multipart: function(req, callback) {
@@ -52,13 +49,32 @@ var api = {
                 // save file
                 fs.writeFile(__dirname + '/images/' + files.image[0].originalFilename, data, function(err) {
                 	callback.call(this, null, {
-	                	img_path: '/images/' + files.image[0].originalFilename
+	                	img_path: '/images/' + files.image[0].originalFilename,
+	                	username: fields.username
 	                });
                 });
 
             });
 
         });
+
+	},
+
+	receive_req: function(req, callback) {
+		
+		var data = '';
+
+		req.on('data', function(chunk) {
+			data += chunk;
+		});
+
+		req.on('end', function() {
+			callback.call(this, null, data);
+		});
+
+		req.on('error', function(err) {
+			callback.call(this, err.toString());
+		});
 
 	},
 
@@ -74,14 +90,19 @@ var api = {
 				return api.respond_err(res, err);
 			}
 
+			var textpath = data.img_path.split('.');
+			textpath.pop();
+			textpath = (textpath[0].replace('/images/', '/ocr/')) + '.txt';
+
+			// save data to database
+			db.insertInto('files', ['img_path', 'ocr_path', 'username'], [data.img_path, textpath, data.username[0]], function(err, rows) {
+				console.log('Successfully saved image / text for user', data.username[0]);
+			});
+
 			// extract text from image
 			api.extract_img_text(__dirname + data.img_path, function(err, ocrData) {
 
 				// save extracted text
-				var textpath = data.img_path.split('.');
-				textpath.pop();
-				textpath = (textpath[0].replace('/images/', '/ocr/')) + '.txt';
-				console.log('writing file to ' + __dirname + textpath);
 				fs.writeFile(__dirname + textpath, ocrData, function(err) {
 
 					api.respond_ok(res, null, [
