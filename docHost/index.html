@@ -30,6 +30,29 @@
             height: 375px;
             background-color: #666;
         }
+
+        .btn {
+            border-radius: 4px;
+            width: 200px;
+            cursor: pointer;
+            margin: 10px auto 15px auto;
+            padding: 15px 0;
+            background: rgba(205,55,0, 0.8);
+            color: #fff;
+            text-align: center;
+        }
+            #capture:hover {
+                background: rgba(205,55,0, 0.7);
+            }
+
+            #capture:active {
+                background: rgba(205,55,0, 1.0);
+            }
+
+        #imgOutput img {
+            width: 500px;
+            height: 375px;
+        }
     </style>
 </head>
 
@@ -54,7 +77,7 @@
 
     <!-- You only need this form and the form-basic.css -->
 
-    <form class="form-basic" method="post" action="/api/post" enctype="multipart/form-data">
+    <form class="form-basic">
 
         <div class="form-title-row">
             <h1>Begin Upload</h1>
@@ -63,36 +86,11 @@
         <div class="form-row">
             <label>
                 <span>User Name</span>
-                <input type="text" name="name">
-            </label>
-        </div>
-
-        <!--<div class="form-row">
-            <label>
-                <span>Email</span>
-                <input type="email" name="email">
+                <input type="text" name="name"  id="username">
             </label>
         </div>
 
         <div class="form-row">
-            <label>
-                <span>Dropdown</span>
-                <select name="dropdown">
-                    <option>Option One</option>
-                    <option>Option Two</option>
-                    <option>Option Three</option>
-                    <option>Option Four</option>
-                </select>
-            </label>
-        </div> -->
-
-        <div class="form-row">
-            <label>
-                <!--<span>Files to Upload</span>
-                <textarea name="textarea"></textarea>-->
-                Select a file: <input type="file" name="img">
-            </label>
-
 
         </div>
         <div class="form-row">
@@ -100,10 +98,9 @@
                 Take a picture:
             </label>
             <video autoplay="true" id="videoElement" width="500" height="400"></video>
-            <button id="capture" onclick="captureImage">Capture</button>
-            <div id="imgOutput">
-
-            </div>
+            <br />
+            <div id="capture" class="btn">Capture</div>
+            <div id="imgOutput"></div>
         </div>
         <div class="form-row">
             <label>
@@ -112,42 +109,23 @@
             </label>
         </div>
 
-        <!-- <div class="form-row">
-             <label><span>Radio</span></label>
-             <div class="form-radio-buttons">
-
-                 <div>
-                     <label>
-                         <input type="radio" name="radio">
-                         <span>Radio option 1</span>
-                     </label>
-                 </div>
-
-                 <div>
-                     <label>
-                         <input type="radio" name="radio">
-                         <span>Radio option 2</span>
-                     </label>
-                 </div>
-
-                 <div>
-                     <label>
-                         <input type="radio" name="radio">
-                         <span>Radio option 3</span>
-                     </label>
-                 </div>
-
-             </div>
-         </div>
-            <-->
-
+            <div id="stderr" style="color:#cd3700;"></div>
+            <div id="submit" class="btn">Submit</div>
         <div class="form-row">
-            <button type="submit">Submit Form</button>
         </div>
 
     </form>
 
+    <form id="outputresult" class="form-basic">
+
+    </form>
+
     <script>
+
+        var capturedImg = null;
+
+        var stderr = document.getElementById('stderr');
+
         window.addEventListener('load', onLoad);
         function onLoad() {
             // paste the following in the chrome console
@@ -170,6 +148,8 @@
         } //onLoad
 
         var video = document.getElementById("videoElement");
+        var output = document.getElementById('imgOutput');
+        var username = document.getElementById('username');
         var scale = 1;
 
         function captureImage(scale, callback) {
@@ -184,15 +164,60 @@
 
             var img = document.createElement("img");
             img.src = canvas.toDataURL();
+            img.width = video.videoWidth * scale;
+            img.height = video.videoHeight * scale;
 
             img.addEventListener('load', function () {
                 callback.call(this, img);
             });
         }
 
+        document.getElementById('submit').addEventListener('click', function() {
+           
+           if(!capturedImg) {
+                stderr.innerHTML = 'You have forgotten to capture your image!';
+                return;
+           }
 
-        document.body.addEventListener("click",
-            function () { captureImage(1, function (img) { document.body.imgOutput.innerHTML = ""; document.body.imgOutput.appendChild(img); console.log(img); }) });
+           if(!username.value) {
+                stderr.innerHTML = 'You have forgotten to enter your username!';
+                return;
+           }
+
+           document.getElementById('submit').style.display = 'none';
+
+            var data = new FormData();
+            data.append('image', capturedImg);
+            data.append('username', username.value);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/post', true);
+            // xhr.setRequestHeader('Content-Type', 'multipart/form-data');
+            // xhr.setRequestHeader('enctype', 'multipart/form-data');
+            xhr.setRequestHeader('enctype', 'multipart/form-data');
+            xhr.send(data);
+            xhr.addEventListener('readystatechange', function() {
+                if(xhr.status == 200 && xhr.readyState == 4) {
+                    document.getElementById('submit').style.display = 'block';
+                    console.log(xhr.responseText);
+                    document.getElementById('outputresult').innerHTML = xhr.responseText;
+                }
+            });
+            
+
+        });
+
+
+        document.getElementById('capture').addEventListener("click", function () { 
+
+            captureImage(1, function (img) { 
+                output.innerHTML = "";
+                output.appendChild(img);
+                capturedImg = img;
+
+            }); 
+
+        });
 
 
     </script>
