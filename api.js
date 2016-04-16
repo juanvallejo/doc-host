@@ -22,7 +22,7 @@ var api = {
 	respond_err: function(res, msg) {
 		res.writeHead(500, {'Content-Type': 'application/json'});
 		res.end(JSON.stringify({
-			"error": "true",
+			"error": true,
 			"message": (msg || '')
 		}));
 	},
@@ -31,7 +31,7 @@ var api = {
 
 		res.writeHead(200, {'Content-Type': 'application/json'});
 		res.end(JSON.stringify({
-			"error": "false",
+			"error": false,
 			"message": (msg || "success"),
 			"uploads": (data || [])
 		}));
