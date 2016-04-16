@@ -5,7 +5,6 @@
   "main": "server.js",
   "dependencies": {},
   "devDependencies": {
-    "atob": "^2.0.3",
     "multiparty": "^4.1.2",
     "mysql": "^2.10.2"
   },

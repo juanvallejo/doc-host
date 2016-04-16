@@ -187,20 +187,26 @@
            document.getElementById('submit').style.display = 'none';
 
             var data = new FormData();
-            data.append('image', capturedImg);
+            data.append('image', capturedImg.src);
+            data.append('image_path', Date.now() + '.png');
             data.append('username', username.value);
 
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/api/post', true);
-            // xhr.setRequestHeader('Content-Type', 'multipart/form-data');
-            // xhr.setRequestHeader('enctype', 'multipart/form-data');
             xhr.setRequestHeader('enctype', 'multipart/form-data');
             xhr.send(data);
             xhr.addEventListener('readystatechange', function() {
-                if(xhr.status == 200 && xhr.readyState == 4) {
+                if(xhr.readyState == 4) {
+
                     document.getElementById('submit').style.display = 'block';
-                    console.log(xhr.responseText);
                     document.getElementById('outputresult').innerHTML = xhr.responseText;
+
+                    if(xhr.status != 200) {
+                        console.log('Error');
+                        var test = JSON.parse(xhr.responseText);
+                        console.log(xhr.responseText);
+                    }
+
                 }
             });
             

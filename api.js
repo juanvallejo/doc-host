@@ -2,7 +2,6 @@ var fs         = require('fs');
 var spawn      = require('child_process').spawn;
 var Multiparty = require('multiparty');
 var db         = require('./db.js');
-var atob = require('atob');
 
 function decodeBase64Image(dataString) {
   var matches = dataString.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/),
@@ -56,17 +55,28 @@ var api = {
             }
 
             if(!length) {
+
             	files = fields;
-				// var base64Data = files.image[0].replace(/^data:image\/png;base64,/, "");
-				console.log(files.image);
-				decodeBase64Image(files.image[0]);
+				
 				// save file
-                // fs.writeFile(__dirname + '/images/image.png', base64Data, 'base64', function(err) {
-                // 	callback.call(this, null, {
-	               //  	img_path: '/images/' + files.image[0].originalFilename,
-	               //  	username: fields.username
-	               //  });
-                // });
+				var buffer = decodeBase64Image(files.image[0]);
+				var filename = files.image_path[0] || 'image.png';
+
+                fs.writeFile(__dirname + '/images/' + filename, buffer.data, function(err) {
+                	
+                	if(err) {
+                		console.log(err);
+                		return callback.call(this, {
+		                	img_path: '/images/' + filename,
+		                	username: fields.username
+		                });
+                	}
+
+                	callback.call(this, null, {
+	                	img_path: '/images/' + filename,
+	                	username: fields.username
+	                });
+                });
             	return;
             }
 
@@ -119,27 +129,6 @@ var api = {
 		if(req.method != 'POST') {
 			return api.respond_err(res, 'Invalid ');
 		}
-
-		var textpath = 'sample1.txt';
-		api.extract_img_text(__dirname + '/doc.jpg', function(err, ocrData) {
-			// save extracted text
-			fs.writeFile(__dirname + textpath, ocrData, function(err) {
-
-				api.respond_ok(res, null,
-					{
-						error: false,
-						message: 'success',
-						img_path: '/images/path',
-						ocr_path: textpath,
-						has_ocr: true,
-						ocr: ocrData,
-						published_at: Date.now()
-					}
-				);
-
-			});
-		});
-		return;
 
 		api.receive_res_multipart(req, function(err, data) {
 
