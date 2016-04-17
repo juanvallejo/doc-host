@@ -39,6 +39,10 @@ var api_routes = {
 	}
 };
 
+var router = {
+	'/': '/DocHost/index.html'
+};
+
 var app = http.createServer(function(req, res) {
 
 	var match = match_req(req);
@@ -46,16 +50,9 @@ var app = http.createServer(function(req, res) {
 		return api_routes[match].fn(req, res);
 	}
 
-	if(req.url == '/') {
-		res.writeHead(200, { 'Content-Type': 'text/html' });
-		return res.end('<form method="POST" action="/api/post" enctype="multipart/form-data"> \
-			<input type="file" name="image" /><br /> \
-			<input type="text" name="username" placeholder="Enter your username" /> \
-			<input type="submit" value="submit" /> \
-		</form>');
-	}
+	var routedReq = router[req.url] || req.url;
  
-	fs.readFile(__dirname + req.url, function(err, data) {
+	fs.readFile(__dirname + routedReq, function(err, data) {
 		
 		if(err) {
 			res.writeHead(500);
