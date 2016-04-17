@@ -1,3 +1,4 @@
+var os         = require('os');
 var fs         = require('fs');
 var spawn      = require('child_process').spawn;
 var Multiparty = require('multiparty');
@@ -173,7 +174,8 @@ var api = {
 
 	extract_img_text: function(source_path, callback) {
 
-		var proc = spawn('python', ['cloudvisreq.py', 'AIzaSyAsDsxqGvG7Ou5Wey0hjCAwDJ1vStsMxgo', source_path]);
+		var py = os.hostname() ==  'fenrir' ? 'python3' : 'python';
+		var proc = spawn(py, ['cloudvisreq.py', 'AIzaSyAsDsxqGvG7Ou5Wey0hjCAwDJ1vStsMxgo', source_path]);
 
 		proc.stdout.on('data', function(data) {
 			callback.call(this, null, data.toString().split('Text:\n')[1]);
