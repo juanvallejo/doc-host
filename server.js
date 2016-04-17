@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
 // define consts
-var PORT = process.env.OPENSHIFT_NODEJS_PORT || 8000;
+var PORT = process.env.OPENSHIFT_NODEJS_PORT || 8443;
 var HOST = process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
 
 var fs = require('fs');
-var http = require('http');
+var http = require('https');
+var pem = require('pem');
 var api = require('./api.js');
 
 var dictionaryOfMimeTypes = {
@@ -43,34 +44,39 @@ var router = {
 	'/': '/DocHost/index.html'
 };
 
-var app = http.createServer(function(req, res) {
+pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
 
-	var match = match_req(req);
-	if(api_routes[match]) {
-		return api_routes[match].fn(req, res);
-	}
+	var app = http.createServer({ key: keys.serviceKey, cert: keys.certificate }, function(req, res) {
 
-	var routedReq = router[req.url] || req.url;
- 
-	fs.readFile(__dirname + routedReq, function(err, data) {
-		
-		if(err) {
-			res.writeHead(404);
-			return res.end(JSON.stringify({
-			    "error": true,
-			    "content": err,
-			    "message": "File not found:  " + (__dirname + routedReq)
-			}));
+		var match = match_req(req);
+		if(api_routes[match]) {
+			return api_routes[match].fn(req, res);
 		}
 
-		var ext = req.url.split('.');
-		ext = ext[ext.length - 1];
-		res.writeHead(200, {'Content-Type': dictionaryOfMimeTypes[ext]});
-		res.end(data);
+		var routedReq = router[req.url] || req.url;
+	 
+		fs.readFile(__dirname + routedReq, function(err, data) {
+			
+			if(err) {
+				res.writeHead(404);
+				return res.end(JSON.stringify({
+				    "error": true,
+				    "content": err,
+				    "message": "File not found:  " + (__dirname + routedReq)
+				}));
+			}
+
+			var ext = req.url.split('.');
+			ext = ext[ext.length - 1];
+			res.writeHead(200, {'Content-Type': dictionaryOfMimeTypes[ext]});
+			res.end(data);
+
+		});
 
 	});
 
-}); 
+	app.listen(PORT, HOST);
+});
 
 function match_req(req) {
 
@@ -89,5 +95,3 @@ function match_req(req) {
 
 	return response;
 }
-
-app.listen(PORT, HOST);

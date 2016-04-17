@@ -6,7 +6,8 @@
   "dependencies": {},
   "devDependencies": {
     "multiparty": "^4.1.2",
-    "mysql": "^2.10.2"
+    "mysql": "^2.10.2",
+    "pem": "^1.8.1"
   },
   "scripts": {
     "test": "test",
