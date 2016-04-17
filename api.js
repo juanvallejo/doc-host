@@ -178,6 +178,8 @@ var api = {
 		var proc = spawn(py, ['cloudvisreq.py', 'AIzaSyAsDsxqGvG7Ou5Wey0hjCAwDJ1vStsMxgo', source_path]);
 
 		proc.stdout.on('data', function(data) {
+			console.log(data);
+			console.log(data.toString());
 			callback.call(this, null, data.toString().split('Text:\n')[1]);
 		});
 	},
