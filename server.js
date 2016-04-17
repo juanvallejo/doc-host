@@ -55,10 +55,11 @@ var app = http.createServer(function(req, res) {
 	fs.readFile(__dirname + routedReq, function(err, data) {
 		
 		if(err) {
-			res.writeHead(500);
+			res.writeHead(404);
 			return res.end(JSON.stringify({
-			    "error": "true",
-			    "message": "Invalid endpoint"
+			    "error": true,
+			    "content": err,
+			    "message": "File not found:  " + (__dirname + routedReq)
 			}));
 		}
 
