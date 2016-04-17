@@ -141,9 +141,10 @@ var api = {
 			textpath = (textpath[0].replace('/images/', '/ocr/')) + '.txt';
 
 			// save data to database
-			db.insertInto('files', ['img_path', 'ocr_path', 'username'], [data.img_path, textpath, data.username[0]], function(err, rows) {
-				console.log('Successfully saved image / text for user', data.username[0]);
-			});
+			// db.insertInto('files', ['img_path', 'ocr_path', 'username'], [data.img_path, textpath, data.username[0]], function(err, rows) {
+				// console.log('Successfully saved image / text for user', data.username[0]);
+				console.log('Database access has been disabled.');
+			// });
 
 			// extract text from image
 			api.extract_img_text(__dirname + data.img_path, function(err, ocrData) {
@@ -187,16 +188,16 @@ var api = {
 		var user = req.url.split('/');
 		user = user[user.length - 1];
 
-		db.selectFrom('files', ['*'], 'username="' + user + '"', function(err, rows) {
+		// db.selectFrom('files', ['*'], 'username="' + user + '"', function(err, rows) {
 			api.respond_ok(res, null,
 				{
 					error: false,
 					message: 'success',
 					user: user,
-					uploads: rows
+					uploads: []
 				}
 			);
-		});
+		// });
 
 	}
 

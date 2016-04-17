@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 // define consts
-var PORT = 8000;
-var HOST = '0.0.0.0';
+var PORT = process.env.OPENSHIFT_NODEJS_PORT || 8000;
+var HOST = process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
 
 var fs = require('fs');
 var http = require('http');
