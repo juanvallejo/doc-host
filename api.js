@@ -174,8 +174,7 @@ var api = {
 
 	extract_img_text: function(source_path, callback) {
 
-		var py = os.hostname() ==  'fenrir' ? 'python3' : 'python';
-		var proc = spawn(py, ['cloudvisreq.py', 'AIzaSyAsDsxqGvG7Ou5Wey0hjCAwDJ1vStsMxgo', source_path]);
+		var proc = spawn('python', ['cloudvisreq.py', 'AIzaSyAsDsxqGvG7Ou5Wey0hjCAwDJ1vStsMxgo', source_path]);
 
 		proc.stdout.on('data', function(data) {
 			console.log(data);
